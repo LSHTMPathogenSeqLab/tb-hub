@@ -14,7 +14,7 @@ def main(args):
 
     logging.basicConfig(level=log_levels[args.log.upper()], format="[%(asctime)s - %(levelname)s] - %(message)s")
     # Mapping
-    run_cmd(f"bwa mem -t {args.threads} {args.ref} {args.R1} {args.R2} | samtools sort -n -l 0 --threads {args.threads} -m 2000M | samtools fixmate -m --threads {args.threads} - - | samtools sort -l 0 --threads {args.threads} -m 2000M | samtools markdup --threads {args.threads} -r -s - {args.out}.bam")
+    run_cmd(f"bwa mem -t {args.threads} -R \"@RG\\tID:{args.out}\\tSM:{args.out}\\tPL:Illumina\" {args.ref} {args.R1} {args.R2} | samtools sort -n -l 0 --threads {args.threads} -m 2000M | samtools fixmate -m --threads {args.threads} - - | samtools sort -l 0 --threads {args.threads} -m 2000M | samtools markdup --threads {args.threads} -r -s - {args.out}.bam")
 
     # Indexing
     run_cmd(f"samtools index --threads {args.threads} {args.out}.bam")
@@ -28,12 +28,12 @@ def main(args):
 
 
 parser = argparse.ArgumentParser(description='tbprofiler script',formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('--R1','-1',type=str,help='',required = True)
-parser.add_argument('--R2','-2',type=str,help='',required = True)
-parser.add_argument('--ref','-r',type=str,help='',required = True)
-parser.add_argument('--out','-o',type=str,help='',required = True)
-parser.add_argument('--threads','-t',default=10,type=str,help='')
-parser.add_argument('--log',default="info",choices=["debug","info","warning","error"],type=str,help='')
+parser.add_argument('--R1','-1',type=str,help='Forward reads',required = True)
+parser.add_argument('--R2','-2',type=str,help='Reverse reads',required = True)
+parser.add_argument('--ref','-r',type=str,help='Reference fasta',required = True)
+parser.add_argument('--out','-o',type=str,help='Output prefix',required = True)
+parser.add_argument('--threads','-t',default=10,type=str,help='Number of threads')
+parser.add_argument('--log',default="info",choices=["debug","info","warning","error"],type=str,help='Default logging level')
 parser.set_defaults(func=main)
 args = parser.parse_args()
 args.func(args)
